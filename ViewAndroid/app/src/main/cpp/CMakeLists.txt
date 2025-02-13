@@ -61,12 +61,9 @@ set(INFERENCE_HELPER_ENABLE_TFLITE_DELEGATE_XNNPACK ON CACHE BOOL "TFLITE_DELEGA
 set(INFERENCE_HELPER_ENABLE_TFLITE_DELEGATE_GPU     ON  CACHE BOOL "TFLITE_DELEGATE_GPU" FORCE)
 set(INFERENCE_HELPER_ENABLE_TFLITE_DELEGATE_EDGETPU OFF CACHE BOOL "TFLITE_DELEGATE_EDGETPU" FORCE)
 set(INFERENCE_HELPER_ENABLE_TFLITE_DELEGATE_NNAPI   ON  CACHE BOOL "TFLITE_DELEGATE_XNNPACK" FORCE)
-# Set INFERENCE_HELPER_ENABLE_TFLITE_DELEGATE_QNN to OFF if building for non-qualcomm device.
-# Otherwise you'll get runtime errors
 set(INFERENCE_HELPER_ENABLE_TFLITE_DELEGATE_QNN ON CACHE BOOL "TFLITE_DELEGATE_QNN" FORCE)
 
-# You can change pj_tflite_det_yolov5 to any project from play_with_tflite directory to try different examples
-# If you change the project, put the corresponding model from play_with_tflite/resource/model into the app/main/src/assets
+
 set(ImageProcessor_DIR "${CMAKE_CURRENT_LIST_DIR}/../../../../../pj_tflite_det_yolov5/image_processor")
 message(${ImageProcessor_DIR})
 
