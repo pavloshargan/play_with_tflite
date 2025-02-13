@@ -9,8 +9,10 @@ To clone build the android app:
 ```
 git clone https://github.com/pavloshargan/play_with_tflite
 git submodule update --init --recursive
+sh download_resource.sh
 cd InferenceHelper/third_party
 sh download_prebuilt_libraries.sh
+
 ```
 
 Then open the ViewAndroid project in Android Studio and run the app
