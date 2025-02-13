@@ -103,7 +103,8 @@ int32_t FacemeshEngine::Initialize(const std::string& work_dir, const int32_t nu
 
     /* Create and Initialize Inference Helper */
 #ifdef USE_TFLITE
-    inference_helper_.reset(InferenceHelper::Create(InferenceHelper::kTensorflowLiteXnnpack));
+//    inference_helper_.reset(InferenceHelper::Create(InferenceHelper::kTensorflowLiteXnnpack));
+    inference_helper_.reset(InferenceHelper::Create(InferenceHelper::kTensorflowLiteQnn));
 #else
     inference_helper_.reset(InferenceHelper::Create(InferenceHelper::kOnnxRuntime));
     //inference_helper_.reset(InferenceHelper::Create(InferenceHelper::kMnn));

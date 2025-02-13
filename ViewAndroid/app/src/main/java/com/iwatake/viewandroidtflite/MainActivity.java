@@ -14,8 +14,8 @@ import androidx.core.content.ContextCompat;
 import androidx.lifecycle.LifecycleOwner;
 
 import android.content.Context;
-import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
+import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Environment;
@@ -25,7 +25,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
@@ -35,12 +34,12 @@ import org.opencv.android.Utils;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
-import org.opencv.core.Point;
-import org.opencv.core.Rect;
-import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.Formatter;
 import java.util.concurrent.ExecutorService;
@@ -87,6 +86,71 @@ public class MainActivity extends AppCompatActivity {
     private AppStatus appStatus = AppStatus.NotInitialized;
     private ViewMode viewMode = ViewMode.Normal;
 
+    private void copyResourceFolderToDocuments() {
+        File documentsDir = getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS);
+        if (documentsDir == null) {
+            Log.e(TAG, "External Documents directory is not available.");
+            return;
+        }
+        // Destination = Documents/resource
+        File resourceDir = new File(documentsDir, "resource");
+        if (!resourceDir.exists()) {
+            resourceDir.mkdirs();
+        }
+
+        try {
+            copyAssetFolder("resource", resourceDir);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Recursively copy a folder from the APK assets to the specified output folder.
+     * @param assetPath  folder name in assets (e.g. "resource")
+     * @param outDir     destination directory on the file system
+     */
+    private void copyAssetFolder(String assetPath, File outDir) throws IOException {
+        AssetManager assetManager = getAssets();
+        String[] items = assetManager.list(assetPath);
+        if (items == null) return;
+
+        for (String item : items) {
+            String fullAssetPath = assetPath + "/" + item;
+            File outFile = new File(outDir, item);
+
+            // Check if it's a folder by attempting to list its contents
+            String[] subItems = assetManager.list(fullAssetPath);
+            if (subItems != null && subItems.length > 0) {
+                // It's a directory
+                if (!outFile.exists()) {
+                    outFile.mkdirs();
+                }
+                copyAssetFolder(fullAssetPath, outFile);
+            } else {
+                // It's a file
+                copyAssetFile(fullAssetPath, outFile);
+            }
+        }
+    }
+
+    /**
+     * Copy a single file from the APK assets to the given output file.
+     */
+    private void copyAssetFile(String assetPath, File outFile) throws IOException {
+        AssetManager assetManager = getAssets();
+        try (
+                InputStream in = assetManager.open(assetPath);
+                FileOutputStream out = new FileOutputStream(outFile)
+        ) {
+            byte[] buffer = new byte[1024];
+            int read;
+            while ((read = in.read(buffer)) != -1) {
+                out.write(buffer, 0, read);
+            }
+        }
+    }
+
     static {
         System.loadLibrary("native-lib");
         System.loadLibrary("opencv_java4");
@@ -95,11 +159,19 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_main);
         getViews();
         setEventListeners();
         exitVrMode();
 
+        // Get the actual extracted .so directory on device
+        String nativeLibDir = getApplicationInfo().nativeLibraryDir;
+        Log.i(TAG, "nativeLibDir = " + nativeLibDir);
+        // Pass it to native code
+        setQnnSkelLibraryDir(nativeLibDir);
+
+        copyResourceFolderToDocuments();
         // create data directory to save resource and model files
         File imageStorageDir = new File(getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), "child");
 
@@ -109,7 +181,8 @@ public class MainActivity extends AppCompatActivity {
                     ImageProcessorCommand(0);
                     appStatus = AppStatus.Initialized;
                 } else {
-                    Log.i(TAG, "[onCreate] Failed to ImageProcessorInitialize");
+                    Log.i(TAG, "[onCreate2] Failed to ImageProcessorInitialize");
+
                 }
             }
             startCamera();
@@ -409,11 +482,11 @@ public class MainActivity extends AppCompatActivity {
                     appStatus = AppStatus.Initialized;
                     startCamera();
                 } else {
-                    Log.i(TAG, "[onRequestPermissionsResult] Failed to ImageProcessorInitialize");
+                    Log.i(TAG, "[onRequestPermissionsResult2] Failed to ImageProcessorInitialize");
                     this.finish();
                 }
             } else{
-                Log.i(TAG, "[onRequestPermissionsResult] Failed to get permissions");
+                Log.i(TAG, "[onRequestPermissionsResult2] Failed to get permissions");
                 this.finish();
             }
         }
@@ -423,6 +496,7 @@ public class MainActivity extends AppCompatActivity {
      * A native method that is implemented by the 'native-lib' native library,
      * which is packaged with this application.
      */
+    public native void setQnnSkelLibraryDir(String skelDir);
     public native int ImageProcessorInitialize();
     public native int ImageProcessorProcess(long objMat);
     public native int ImageProcessorFinalize();

@@ -110,7 +110,8 @@ int32_t FaceDetectionEngine::Initialize(const std::string& work_dir, const int32
 
     /* Create and Initialize Inference Helper */
     //inference_helper_.reset(InferenceHelper::Create(InferenceHelper::kTensorflowLite));
-    inference_helper_.reset(InferenceHelper::Create(InferenceHelper::kTensorflowLiteXnnpack));
+//    inference_helper_.reset(InferenceHelper::Create(InferenceHelper::kTensorflowLiteXnnpack));
+    inference_helper_.reset(InferenceHelper::Create(InferenceHelper::kTensorflowLiteQnn));
     //inference_helper_.reset(InferenceHelper::Create(InferenceHelper::kTensorflowLiteGpu));
     //inference_helper_.reset(InferenceHelper::Create(InferenceHelper::kTensorflowLiteEdgetpu));
     // inference_helper_.reset(InferenceHelper::Create(InferenceHelper::kTensorflowLiteNnapi));

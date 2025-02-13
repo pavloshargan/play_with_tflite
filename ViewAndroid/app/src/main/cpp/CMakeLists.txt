@@ -3,7 +3,15 @@
 
 # Sets the minimum version of CMake required to build the native library.
 
-cmake_minimum_required(VERSION 3.4.1)
+cmake_minimum_required(VERSION 3.19)
+set(CMAKE_CXX_STANDARD 17)
+
+# Quick debug: print whether QNN_SDK was passed by Gradle
+if(NOT DEFINED QNN_SDK)
+    message(WARNING "[native-lib CMake] QNN_SDK is NOT DEFINED")
+else()
+    message(STATUS "[native-lib CMake] QNN_SDK = ${QNN_SDK}")
+endif()
 
 #↓↓↓ 追加 ↓↓↓
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/jniLibs/${ANDROID_ABI})
@@ -20,56 +28,31 @@ set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -fopenmp")
 if(DEFINED ANDROID_NDK_MAJOR AND ${ANDROID_NDK_MAJOR} GREATER 20)
     set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -static-openmp")
 endif()
-#↑↑↑ 追加 ↑↑↑
-#set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fexceptions")
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fexceptions")
 
-
-# Creates and names a library, sets it as either STATIC
-# or SHARED, and provides the relative paths to its source code.
-# You can define multiple libraries, and CMake builds them for you.
-# Gradle automatically packages shared libraries with your APK.
-
-add_library( # Sets the name of the library.
+add_library(
         native-lib
-
-        # Sets the library as a shared library.
         SHARED
-
-        # Provides a relative path to your source file(s).
         native-lib.cpp )
 
-# Searches for a specified prebuilt library and stores the path as a
-# variable. Because CMake includes system libraries in the search path by
-# default, you only need to specify the name of the public NDK library
-# you want to add. CMake verifies that the library exists before
-# completing its build.
-
-find_library( # Sets the name of the path variable.
+find_library(
         log-lib
-
-        # Specifies the name of the NDK library that
-        # you want CMake to locate.
         log )
 
-# Specifies libraries CMake should link to your target library. You
-# can link multiple libraries, such as libraries you define in this
-# build script, prebuilt third-party libraries, or system libraries.
-
-target_link_libraries( # Specifies the target library.
+target_link_libraries(
         native-lib
-
-        # Links the target library to the log library
-        # included in the NDK.
         ${log-lib} )
 
 # ↓↓↓ 追加 ↓↓↓
 ### For OpenCV
-#set(OpenCV_DIR "D:/devel/opencv-4.3.0-android-sdk/OpenCV-android-sdk/sdk/native/jni")
-set(OpenCV_DIR "${CMAKE_CURRENT_LIST_DIR}/../../../../sdk/native/jni")
+set(OpenCV_DIR "${CMAKE_CURRENT_LIST_DIR}/../../../../OpenCV-android-sdk/sdk/native/jni")
+set(thirdparty_libs "${CMAKE_SOURCE_DIR}/../../../../OpenCV-android-sdk/sdk/native/3rdparty/libs")
+set(include_dir "${CMAKE_SOURCE_DIR}/../../../../OpenCV-android-sdk/sdk/native/jni/include")
+
 find_package(OpenCV REQUIRED)
+
 target_include_directories(native-lib PUBLIC ${OpenCV_INCLUDE_DIRS})
 target_link_libraries(native-lib ${OpenCV_LIBS})
+
 
 ### For my module
 # Set TensorflowLite delegate options
@@ -78,10 +61,28 @@ set(INFERENCE_HELPER_ENABLE_TFLITE_DELEGATE_XNNPACK ON CACHE BOOL "TFLITE_DELEGA
 set(INFERENCE_HELPER_ENABLE_TFLITE_DELEGATE_GPU     ON  CACHE BOOL "TFLITE_DELEGATE_GPU" FORCE)
 set(INFERENCE_HELPER_ENABLE_TFLITE_DELEGATE_EDGETPU OFF CACHE BOOL "TFLITE_DELEGATE_EDGETPU" FORCE)
 set(INFERENCE_HELPER_ENABLE_TFLITE_DELEGATE_NNAPI   ON  CACHE BOOL "TFLITE_DELEGATE_XNNPACK" FORCE)
+# Set INFERENCE_HELPER_ENABLE_TFLITE_DELEGATE_QNN to OFF if building for non-qualcomm device.
+# Otherwise you'll get runtime errors
+set(INFERENCE_HELPER_ENABLE_TFLITE_DELEGATE_QNN ON CACHE BOOL "TFLITE_DELEGATE_QNN" FORCE)
 
-set(ImageProcessor_DIR "${CMAKE_CURRENT_LIST_DIR}/../../../../../pj_tflite_det_yolox/image_processor")
+# You can change pj_tflite_det_yolov5 to any project from play_with_tflite directory to try different examples
+# If you change the project, put the corresponding model from play_with_tflite/resource/model into the app/main/src/assets
+set(ImageProcessor_DIR "${CMAKE_CURRENT_LIST_DIR}/../../../../../pj_tflite_det_yolov5/image_processor")
 message(${ImageProcessor_DIR})
+
 add_subdirectory(${ImageProcessor_DIR} ImageProcessor)
 target_include_directories(native-lib PUBLIC ${ImageProcessor_DIR})
-target_link_libraries(native-lib ImageProcessor)
-# ↑↑↑ 追加 ↑↑↑
+target_link_libraries(native-lib
+        ImageProcessor
+        z                       # Compression library
+        android                 # Links with the Android NDK android library
+        mediandk                # Links with the Android NDK media library
+        camera2ndk)
+# Link libippicv and libippiw only if x86 or x86_64
+if("${ANDROID_ABI}" STREQUAL "x86" OR "${ANDROID_ABI}" STREQUAL "x86_64")
+    target_link_libraries(
+            native-lib
+            libippicv
+            libippiw
+    )
+endif()

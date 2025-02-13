@@ -110,7 +110,8 @@ int32_t LaneEngine::Initialize(const std::string& work_dir, const int32_t num_th
     /* Create and Initialize Inference Helper */
 #ifdef USE_TFLITE
     //inference_helper_.reset(InferenceHelper::Create(InferenceHelper::kTensorflowLite));
-    inference_helper_.reset(InferenceHelper::Create(InferenceHelper::kTensorflowLiteXnnpack));
+//    inference_helper_.reset(InferenceHelper::Create(InferenceHelper::kTensorflowLiteXnnpack));
+    inference_helper_.reset(InferenceHelper::Create(InferenceHelper::kTensorflowLiteQnn));
     // inference_helper_.reset(InferenceHelper::Create(InferenceHelper::kTensorflowLiteGpu));
     // inference_helper_.reset(InferenceHelper::Create(InferenceHelper::kTensorflowLiteEdgetpu));
     // inference_helper_.reset(InferenceHelper::Create(InferenceHelper::kTensorflowLiteNnapi));
@@ -256,7 +257,7 @@ int32_t LaneEngine::Process(const cv::Mat& original_mat, Result& result)
 * Copyright 2019 Baidu Inc. All Rights Reserved.
 * Author: MaybeShewill-CV
 * File: lanenetModel.cpp
-* Date: 2019/11/5 ‰ºŒß5:19
+* Date: 2019/11/5 ï¿½ï¿½ï¿½ï¿½5:19
 ************************************************/
 static void gather_pixel_embedding_features(const cv::Mat& binary_mask, const cv::Mat& pixel_embedding,
     std::vector<cv::Point>& coords,
