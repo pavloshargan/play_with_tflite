@@ -75,7 +75,8 @@ int32_t FacemeshEngine::Initialize(const std::string& work_dir, const int32_t nu
 
     /* Create and Initialize Inference Helper */
     //inference_helper_.reset(InferenceHelper::Create(InferenceHelper::kTensorflowLite));
-    inference_helper_.reset(InferenceHelper::Create(InferenceHelper::kTensorflowLiteXnnpack));
+//    inference_helper_.reset(InferenceHelper::Create(InferenceHelper::kTensorflowLiteXnnpack));
+    inference_helper_.reset(InferenceHelper::Create(InferenceHelper::kTensorflowLiteQnn));
     //inference_helper_.reset(InferenceHelper::Create(InferenceHelper::kTensorflowLiteGpu1));
     //inference_helper_.reset(InferenceHelper::Create(InferenceHelper::kTensorflowLiteEdgetpu));
     // inference_helper_.reset(InferenceHelper::Create(InferenceHelper::kTensorflowLiteNnapi));

@@ -96,7 +96,8 @@ int32_t FrameInterpolationEngine::Initialize(const std::string& work_dir, const 
 
     /* Create and Initialize Inference Helper */
 #ifdef USE_TFLITE
-    inference_helper_.reset(InferenceHelper::Create(InferenceHelper::kTensorflowLiteXnnpack));
+//    inference_helper_.reset(InferenceHelper::Create(InferenceHelper::kTensorflowLiteXnnpack));
+    inference_helper_.reset(InferenceHelper::Create(InferenceHelper::kTensorflowLiteQnn));
 #else
     inference_helper_.reset(InferenceHelper::Create(InferenceHelper::kTensorrt));
 #endif

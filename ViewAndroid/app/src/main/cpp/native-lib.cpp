@@ -5,12 +5,26 @@
 #include <opencv2/opencv.hpp>
 #include "image_processor.h"
 
-//#define WORK_DIR    "/sdcard/resource/"
-//#define WORK_DIR    "/mnt/sdcard/resource"
-//#define WORK_DIR    "/storage/emulated/0/resource/"
 #define WORK_DIR    "/storage/emulated/0/Android/data/com.iwatake.viewandroidtflite/files/Documents/resource"
 
 static std::mutex g_mtx;
+
+#include <cstdlib>  // for setenv
+
+#include "QnnGlobals.hpp"
+
+std::string gQnnSkelLibraryDir;  // The actual "instance" of this global variable
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_iwatake_viewandroidtflite_MainActivity_setQnnSkelLibraryDir(
+        JNIEnv* env,
+        jobject /* this */,
+        jstring jSkelDir) {
+    const char* cpath = env->GetStringUTFChars(jSkelDir, nullptr);
+    gQnnSkelLibraryDir = cpath;
+    env->ReleaseStringUTFChars(jSkelDir, cpath);
+}
 
 extern "C" JNIEXPORT jint JNICALL
 Java_com_iwatake_viewandroidtflite_MainActivity_ImageProcessorInitialize(
