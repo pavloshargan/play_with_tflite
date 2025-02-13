@@ -1,5 +1,8 @@
 .vscode
+.DS_Store
 build/
 resource/
 third_party/tensorflow_prebuilt/
 third_party/edgetpu_prebuilt/
+ViewAndroid/OpenCV-android-sdk
+ViewAndroid/qairt
