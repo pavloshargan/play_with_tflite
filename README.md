@@ -4,7 +4,7 @@ A native C++ library for accelerated model inference using Qnn/GPU/XNNPack TFLit
 
 This is a fork iwatake2222/play_with_tflite with added QNN Tflite delegate
 
-To clone build the android app:
+Instructions to build the Android app:
 
 ```
 git clone https://github.com/pavloshargan/play_with_tflite
