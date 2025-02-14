@@ -40,7 +40,7 @@ limitations under the License.
 #define PRINT_E(...) COMMON_HELPER_PRINT_E(TAG, __VA_ARGS__)
 
 /* Model parameters */
-#define MODEL_NAME  "movenet_multipose_256x256_lightning.tflite"
+#define MODEL_NAME  "movenet_lightning.tflite"
 #define TENSORTYPE  TensorInfo::kTensorTypeFp32
 #define INPUT_NAME  "input:0"
 #define INPUT_DIMS  { 1, 256, 256, 3 }
@@ -77,8 +77,8 @@ int32_t PoseEngine::Initialize(const std::string& work_dir, const int32_t num_th
 
     /* Create and Initialize Inference Helper */
     //inference_helper_.reset(InferenceHelper::Create(InferenceHelper::kTensorflowLite));
-//    inference_helper_.reset(InferenceHelper::Create(InferenceHelper::kTensorflowLiteXnnpack));
     inference_helper_.reset(InferenceHelper::Create(InferenceHelper::kTensorflowLiteQnn));
+    // inference_helper_.reset(InferenceHelper::Create(InferenceHelper::kTensorflowLiteXnnpack));
     // inference_helper_.reset(InferenceHelper::Create(InferenceHelper::kTensorflowLiteGpu));
     // inference_helper_.reset(InferenceHelper::Create(InferenceHelper::kTensorflowLiteEdgetpu));
     // inference_helper_.reset(InferenceHelper::Create(InferenceHelper::kTensorflowLiteNnapi));
