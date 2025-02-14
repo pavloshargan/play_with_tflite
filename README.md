@@ -6,6 +6,8 @@ This is a fork iwatake2222/play_with_tflite with added QNN Tflite delegate
 
 Instructions to build the Android app:
 
+Note: One of the pre-built libraries provided was built by the author of the original repository (TensorFlow Lite library). Other dependencies are downloaded from official sources.
+
 ```
 git clone https://github.com/pavloshargan/play_with_tflite
 git submodule update --init --recursive
