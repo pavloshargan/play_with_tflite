@@ -1,6 +1,6 @@
 # play_with_tflite Android
 
-A native C++ library for accelerated model inference using Qnn/GPU/XNNPack TFLite delegates, integrated with OpenCV 4.10 for image processing, and providing Java bindings for real-time camera preview and result visualization.
+A C++ library for accelerated model inference using Qnn/GPU/XNNPack TFLite delegates, integrated with OpenCV 4.10 for image processing, and providing Java bindings for real-time camera preview and result visualization.
 
 This is a fork iwatake2222/play_with_tflite with added QNN Tflite delegate
 
